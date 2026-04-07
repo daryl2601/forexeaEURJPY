@@ -22,7 +22,7 @@ The EA is built around a multi-day statistical model using the following variabl
 | **Q** | `((High(9) + High(7)) ÷ 2 + MA_hour(0) + 10.00) − 5.00` |
 | **a** | Open of hour(0) — two trading days ago |
 | **b** | High of hour(0) — two trading days ago |
-| **C** | `(((Low(0)₋₂ + Low(0)₋₂) ÷ 2 − 0.2 + Low(2)₋₂) ÷ 2 + P₋₂ − 1.44) ÷ 2 + 0.144` |
+| **C** | `((Low(0)₋₂ − 0.2 + Low(2)₋₂) ÷ 2 + P₋₂ − 1.44) ÷ 2 + 0.144` |
 | **d** | `((((Open(0)₋₂ + High(0)₋₂) ÷ 2 + Q₋₃ − 0.3) ÷ 2 + P₋₃ ÷ 2 + HighestHigh(0–9)₋₂ − 1.44) ÷ 2` |
 | **e** | `(((Low(0)₋₁ + Low(1)₋₁) ÷ 2 + Low(2)₋₁) ÷ 2 + HighestHigh(0–9)₋₁ − 1.44) ÷ 2 + 0.044` |
 | **F** | `min(Low_hour(9) today, Low_hour(9) one day ago)` |
@@ -31,8 +31,8 @@ The EA is built around a multi-day statistical model using the following variabl
 
 | Signal | Formula |
 |--------|---------|
-| **Sell Stop** | `(((a + b + C) ÷ 2 + 0.1 + d) ÷ 2 + e) ÷ 2 + sf) ÷ 6` |
-| **Buy Stop**  | `P(today) × MA_hour(9) − F × pipSize` |
+| **Sell Stop** | `(((a + b + C) / 2 + 0.1 + d) / 2 + e) / 2 + sf) / 6` → simplified: `((((a+b+C)/2 + 0.1 + d)/2 + e)/2 + sf) / 6` |
+| **Buy Stop**  | `P(today) × MA_hour(9) − F × pipSize` (converts P ratio to price, then applies F floor offset) |
 
 ---
 

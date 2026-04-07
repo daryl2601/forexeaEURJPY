@@ -464,21 +464,23 @@ double CalcF()
 
 //+------------------------------------------------------------------+
 //| Calculate Sell Stop                                              |
-//| SellStop = (((a + b + c) / 2 + 0.1 + d) / 2 + e) / 2 + sf) / 6|
+//| SellStop = ((((a + b + modelC) / 2 + 0.1 + modelD) / 2         |
+//|              + modelE) / 2 + sellFactor) / 6                    |
 //+------------------------------------------------------------------+
-double CalcSellStop(double a, double b, double c,
-                    double d, double e, double sf)
+double CalcSellStop(double openH0_2d, double highH0_2d, double modelC,
+                    double modelD,    double modelE,    double sellFactor)
 {
-   double step1 = (a + b + c) / 2.0;
-   double step2 = (step1 + 0.1 + d) / 2.0;
-   double step3 = (step2 + e) / 2.0 + sf;
-   return step3 / 6.0;
+   double step1 = (openH0_2d + highH0_2d + modelC) / 2.0;
+   double step2 = (step1 + 0.1 + modelD) / 2.0;
+   double step3 = ((step2 + modelE) / 2.0 + sellFactor) / 6.0;
+   return step3;
 }
 
 //+------------------------------------------------------------------+
 //| Calculate Buy Stop                                               |
-//| BuyStop = P(today) - F                                           |
-//| (Buy stop is placed below current P, offset by the F floor value)|
+//| BuyStop = P(today) × MA_hour(9) − F × pipSize                   |
+//| P is a ratio (~1.0003); converting back to price requires        |
+//| multiplying by MA(H9). F provides a floor offset in pip units.  |
 //+------------------------------------------------------------------+
 double CalcBuyStop(double P, double F)
 {
@@ -577,10 +579,11 @@ void PlaceBuyStopOrder(double price)
    }
    else
    {
-      sl = (InpStopLossPips > 0)   ? NormalizeDouble(ask - InpStopLossPips * g_pipSize, g_digits)   : 0.0;
-      tp = (InpTakeProfitPips > 0) ? NormalizeDouble(ask + InpTakeProfitPips * g_pipSize, g_digits) : 0.0;
-      if(g_trade.Buy(InpLotSize, Symbol(), ask, sl, tp, "EURJPY Model Buy"))
-         Print("Market BUY placed. SL=", sl, " TP=", tp);
+      // Market buy: SL/TP based on current ask price
+      double slMkt = (InpStopLossPips > 0)   ? NormalizeDouble(ask - InpStopLossPips * g_pipSize, g_digits)   : 0.0;
+      double tpMkt = (InpTakeProfitPips > 0) ? NormalizeDouble(ask + InpTakeProfitPips * g_pipSize, g_digits) : 0.0;
+      if(g_trade.Buy(InpLotSize, Symbol(), ask, slMkt, tpMkt, "EURJPY Model Buy"))
+         Print("Market BUY placed. SL=", slMkt, " TP=", tpMkt);
       else
          Print("Market BUY failed: ", g_trade.ResultRetcodeDescription());
    }
