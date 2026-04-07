@@ -1,0 +1,2 @@
+# forexeaEURJPY
+Trading Strategy
